@@ -1,0 +1,88 @@
+services:
+  mongodb:
+    image: mongo:4.4
+    container_name: mongodb-container
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/mongodb_data:/data/db
+      - ./config/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 123456
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "mongodb-log"
+    shm_size: 25g
+    networks:
+      - infrastructure
+
+  redis:
+    image: "redis:alpine"
+    expose:
+      - "6379"
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "pipelines_redis"
+    networks:
+      - infrastructure
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+    environment:
+      - discovery.type=single-node      
+    ports:
+      - 9200:9200
+    networks:
+      - infrastructure
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.6.2
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+      - logstash
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "pipelines_kibana"
+    networks:
+      - infrastructure
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.6.2
+    links:
+      - elasticsearch
+    volumes:
+      - .:/etc/logstash
+    command: logstash -f /etc/logstash/logstash.conf
+    ports:
+      - 12201:12201/udp
+    depends_on:
+      - elasticsearch
+    networks:
+      - infrastructure
+
+  jupyter:
+    build: .
+    ports:
+    - "8888:8888"
+    volumes:
+    - ./notebooks:/home/jovyan/work
+    command: "start-notebook.sh --NotebookApp.token=''"
+    networks:
+      - infrastructure
+
+volumes:
+  mongodb_data:
+
+networks:
+  infrastructure:
+    name: custom_infrastructure
