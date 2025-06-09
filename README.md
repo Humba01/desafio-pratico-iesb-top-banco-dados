@@ -2,6 +2,8 @@
 
 ## Mini tutorial
 
+<div align="justify">
+
 1. Realizar o clone desse repositório dentro da raiz da sua máquina Linux:
 ```bash
 $ git clone https://github.com/Humba01/desafio-pratico-iesb-top-banco-dados.git
@@ -66,3 +68,4 @@ localhost:8888
 
 7. Teste e aproveite.
 
+</div>
