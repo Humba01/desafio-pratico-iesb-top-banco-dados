@@ -55,7 +55,7 @@ $ sudo docker compose up --build
 $ sudo docker compose up -d
 ```
 
-6. Depois de subir os containers, abra os endereços do Kibana e do Jupyter Notebook:
+6. Depois de subir os containers, abra os endereços no navegador, do Kibana e do Jupyter Notebook:
 ```
 # kibana
 localhost:5601
